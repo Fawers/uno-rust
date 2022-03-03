@@ -1,58 +1,7 @@
 use rand;
 use rand::seq::SliceRandom;
 
-pub use Face::*;
-pub use Color::*;
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub enum Face {
-    Zero, One, Two, Three, Four,
-    Five, Six, Seven, Eight, Nine,
-    Skip, FlipDirection, PlusTwo, PlusFour, ChangeColor
-}
-
-impl Face {
-    fn slice() -> &'static [Face] {
-        &[
-            Zero, One, Two, Three, Four,
-            Five, Six, Seven, Eight, Nine,
-            Skip, FlipDirection, PlusTwo, PlusFour, ChangeColor
-        ]
-    }
-
-    fn one_to_plustwo() -> &'static [Face] {
-        let s = Self::slice();
-        &s[1..s.len()-2]
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub enum Color {
-    Red,
-    Yellow,
-    Green,
-    Blue
-}
-
-impl Color {
-    fn slice() -> &'static [Color] {
-        &[Red, Yellow, Green, Blue]
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Card(pub Face, pub Option<Color>);
-
-impl Card {
-    pub fn can_be_placed_onto(&self, card: &Card) -> bool {
-        match (self, card) {
-            (Card(PlusFour | ChangeColor, _), _) => true,
-            (Card(lface, _), Card(rface, _)) if lface == rface => true,
-            (Card(_, Some(lcolor)), Card(_, Some(rcolor))) if lcolor == rcolor => true,
-            _ => false
-        }
-    }
-}
+use super::*;
 
 #[derive(Debug)]
 pub struct Deck(Vec<Card>, rand::prelude::ThreadRng);
@@ -65,25 +14,64 @@ impl Deck {
     pub fn shuffle(&mut self) {
         self.0.shuffle(&mut self.1);
     }
+
+    pub fn sort(&mut self) {
+        self.0.sort_unstable_by_key(|&Card(face, color)| (color, face));
+    }
+
+    pub fn empty(&self) -> bool {
+        self.0.len() == 0
+    }
+
+    pub fn put(&mut self, card: Card) {
+        self.0.push(card);
+    }
+
+    pub fn take(&mut self) -> Option<Card> {
+        self.0.pop()
+    }
+
+    pub fn choose(&mut self, index: usize) -> Card {
+        self.0.remove(index)
+    }
+
+    pub fn peek(&self) -> Option<&Card> {
+        self.0.last()
+    }
+
+    pub fn cards(&self) -> String {
+        self.0.iter()
+            .map(ToString::to_string)
+            .reduce(|a, b| format!("{} {}", a, b))
+            .unwrap_or(String::from(""))
+    }
+
+    pub fn get_candidates_for_card(&self, card: &Card) -> Vec<(usize, &Card)> {
+        self.0
+            .iter()
+            .enumerate()
+            .filter(|&(_, c)| c.can_be_placed_onto(card))
+            .collect()
+    }
 }
 
 pub fn mkdeck() -> Deck {
     let mut deck = Deck::new();
 
     for &color in Color::slice() {
-        deck.0.push(Card(Zero, Some(color)));
+        deck.put(Card(Zero, Some(color)));
     }
 
     for &face in Face::one_to_plustwo() {
         for &color in Color::slice() {
-            deck.0.push(Card(face, Some(color)));
-            deck.0.push(Card(face, Some(color)));
+            deck.put(Card(face, Some(color)));
+            deck.put(Card(face, Some(color)));
         }
     }
 
     for _ in 0..4 {
-        deck.0.push(Card(PlusFour, None));
-        deck.0.push(Card(ChangeColor, None))
+        deck.put(Card(PlusFour, None));
+        deck.put(Card(ChangeColor, None))
     }
 
     deck.shuffle();
@@ -143,9 +131,7 @@ mod tests {
     fn deck_has_8_plusfour_and_changecolor_cards() {
         let num_cards = mkdeck().0
             .iter()
-            .filter(|Card(face, color)| {
-                color == &None &&
-                [PlusFour, ChangeColor].contains(face)})
+            .filter(|Card(face, color)| color == &None && [PlusFour, ChangeColor].contains(face))
             .collect::<Vec<&Card>>()
             .len();
         assert_eq!(num_cards, 8);
