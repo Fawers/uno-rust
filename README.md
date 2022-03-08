@@ -19,6 +19,6 @@ CLI Uno card game written in Rust.
 - [x] Nice cards (see [images](./imgs))
 - [ ] Tests
   - [ ] Game
-  - [ ] Players
+  - [x] Players
   - [x] Cards
   - [x] Decks

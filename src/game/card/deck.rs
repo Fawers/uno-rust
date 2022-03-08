@@ -43,7 +43,7 @@ impl Deck {
         self.0.iter()
             .map(ToString::to_string)
             .reduce(|a, b| format!("{} {}", a, b))
-            .unwrap_or(String::from(""))
+            .unwrap_or_else(String::new)
     }
 
     pub fn get_candidates_for_card(&self, card: &Card) -> Vec<(usize, &Card)> {
