@@ -1,5 +1,6 @@
 pub mod card;
 pub mod player;
+pub mod rules;
 
 #[derive(Debug)]
 pub struct Game {

@@ -1,10 +1,12 @@
 pub mod deck;
+pub mod effect;
 
 use std::io;
 
 pub use Color::*;
 pub use Face::*;
 pub use deck::*;
+pub use effect::*;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum Face {
