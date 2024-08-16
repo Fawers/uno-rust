@@ -58,30 +58,6 @@ where S: Shuffler,
                     queue.step(); // ¯\_(ツ)_/¯
                 }
             });
-
-            /* keeping for historical reasons
-            for rule in &ctx.rules {
-                for action in rule.applies(new_top) {
-                    println!("{action:?}");
-                    match action {
-                        ApplyEffect::UponPlayer(fx) => {
-                            let times = if fx == PlayerEffect::Draw2 { 2 } else { 4 };
-                            for _ in 0..times {
-                                queue.next().draw(ctx.deck.cards_mut().pop().unwrap());
-                            }
-                        },
-                        ApplyEffect::UponSession(SessionEffect::SkipPlayer) => {
-                            queue.forward();
-                        },
-                        ApplyEffect::UponSession(SessionEffect::FlipDirection) => {
-                            queue.flip();
-                            queue.forward();
-                            queue.forward();
-                        }
-                    }
-                }
-            }
-            */
         }
     }
 }
