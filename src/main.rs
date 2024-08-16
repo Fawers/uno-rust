@@ -2,7 +2,7 @@ use uno::cards::{create_uno_cards, deck::Deck};
 use uno::players::{card_pickers, color_pickers};
 use uno::players::{local::LocalHumanPlayer, machine::MachinePlayer};
 use uno::rules;
-use uno::sessions::{Session, SessionContext, local::LocalSession};
+use uno::sessions::{Session, SessionContext, local::CLISession};
 use uno::utils::{dealers, shufflers, loggers::stdout_logger};
 
 fn main() {
@@ -33,6 +33,6 @@ fn main() {
         dealer: dealers::new()
     };
 
-    let mut sesh = LocalSession;
+    let mut sesh = CLISession;
     sesh.run(context);
 }

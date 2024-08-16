@@ -4,9 +4,9 @@ use super::{Session, SessionContext};
 
 const MINIMUM_NECESSARY_FOR_TURN: usize = 3;
 
-pub struct LocalSession;
+pub struct CLISession;
 
-impl<S, D> Session<S, D> for LocalSession
+impl<S, D> Session<S, D> for CLISession
 where S: Shuffler,
       D: Dealer
 {
@@ -62,7 +62,7 @@ where S: Shuffler,
     }
 }
 
-impl LocalSession {
+impl CLISession {
     fn redo_deck_from_discard_pile(&mut self, deck: &mut Deck, pile: &mut Deck) {
         let mut to_reappend = Vec::with_capacity(deck.cards().len());
         let cards = deck.cards_mut();
@@ -71,7 +71,11 @@ impl LocalSession {
         to_reappend.append(cards);
 
         while discards.len() > 1 {
-            cards.push(discards.pop().unwrap());
+            let mut card = discards.pop().unwrap();
+            if let Card(Some(_), Face::ChangeColor | Face::PlusFour) = &card {
+                card.0 = None;
+            }
+            cards.push(card);
         }
 
         cards.append(&mut to_reappend);
