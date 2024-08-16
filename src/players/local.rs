@@ -1,6 +1,7 @@
 use std::io::{self, Write};
 
-use crate::{cards::{deck::Deck, types::Color, Card}, utils::loggers::Logger};
+use crate::cards::{Card, deck::Deck, types::Color};
+use crate::utils::loggers::Logger;
 
 use super::{card_pickers::CardPicker, color_pickers::ColorPicker, Player};
 

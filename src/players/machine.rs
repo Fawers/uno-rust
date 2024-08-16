@@ -1,4 +1,5 @@
-use crate::{cards::{deck::Deck, Card}, utils::loggers::Logger};
+use crate::cards::{Card, deck::Deck};
+use crate::utils::loggers::Logger;
 
 use super::{card_pickers::CardPicker, color_pickers::ColorPicker, Player};
 

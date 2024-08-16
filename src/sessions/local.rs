@@ -1,4 +1,8 @@
-use crate::{cards::deck::Deck, effects::{PlayerEffect, SessionEffect}, effects::apply::ApplyEffect, utils::{dealers::Dealer, players::PlayerQueue, shufflers::Shuffler}};
+use crate::cards::deck::Deck;
+use crate::cards::types::Face;
+use crate::cards::Card;
+use crate::effects::{PlayerEffect, SessionEffect, apply::ApplyEffect};
+use crate::utils::{dealers::Dealer, players::PlayerQueue, shufflers::Shuffler};
 
 use super::{Session, SessionContext};
 
