@@ -1,4 +1,7 @@
-use crate::{cards::deck::Deck, players::Players, rules::Rules, utils::{dealers::Dealer, shufflers::Shuffler}};
+use crate::cards::deck::Deck;
+use crate::players::Players;
+use crate::rules::Rules;
+use crate::utils::{dealers::Dealer, shufflers::Shuffler};
 
 pub mod local;
 
