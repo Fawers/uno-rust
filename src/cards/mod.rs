@@ -1,102 +1,56 @@
 pub mod deck;
 pub mod types;
+pub mod utils;
 
-use std::{collections::HashMap, hash::Hash};
+use types::{Color, Face, UncoloredFace};
 
-use deck::Deck;
-use types::{Color, Face};
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct UncoloredCard(pub UncoloredFace);
 
-use crate::{effects::apply::ApplyEffect, rules::Rules};
+impl UncoloredCard {
+    pub fn into_colored(self, color: Color) -> ColoredCard {
+        ColoredCard(self.0.into(), color)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ColoredCard(pub Face, pub Color);
 
 #[derive(Debug, PartialEq, PartialOrd, Eq, Ord)]
-pub struct Card(pub Option<Color>, pub Face);
+pub enum Card {
+    Uncolored(UncoloredCard),
+    Colored(ColoredCard)
+}
 
 impl Card {
-    pub fn stacks_upon(&self, other: &Self) -> bool {
-        self.0 == other.0 || self.1 == other.1 || self.0.is_none() || other.0.is_none()
-    }
-
-    pub fn effects(&self, rules: &Rules) -> Vec<ApplyEffect> {
-        rules.iter()
-            .flat_map(|r| r.applies(self))
-            .collect()
-    }
-}
-
-pub fn count_cards_by_key<T, F>(cards: Vec<&Card>, mut key: F) -> Vec<(T, usize)>
-where T: Eq + Hash + Clone,
-      F: FnMut(&Card) -> T
-{
-    let mut map = HashMap::new();
-
-    for card in cards {
-        map
-            .entry(key(card))
-            .and_modify(|count| *count += 1)
-            .or_insert(1);
-    }
-
-    let mut v = map.into_iter().collect::<Vec<_>>();
-    v.sort_by_key(|item| -(item.1 as isize));
-    v
-}
-
-pub fn count_cards_by_color(cards: Vec<&Card>) -> Vec<(Option<Color>, usize)> {
-    count_cards_by_key(cards, |c| c.0.clone())
-}
-
-pub fn count_cards_by_face(cards: Vec<&Card>) -> Vec<(Face, usize)> {
-    count_cards_by_key(cards, |c| c.1.clone())
-}
-
-pub fn create_uno_cards() -> Deck {
-    let mut d = Deck::new(108);
-    let v = d.cards_mut();
-
-    for color in Color::iter() {
-        v.push(Card(Some(color), Face::Zero));
-
-        for face in Face::one_to_plustwo() {
-            v.push(Card(Some(color), face));
-            v.push(Card(Some(color), face));
+    pub fn can_stack_upon(&self, card_on_top: &ColoredCard) -> bool {
+        let ColoredCard(face_on_top, color_on_top) = card_on_top;
+        match self {
+            Card::Uncolored(_) => true,
+            Card::Colored(ColoredCard(face, color)) => {
+                face == face_on_top || color == color_on_top
+            }
         }
     }
 
-    for _ in 0..4 {
-        v.push(Card(None, Face::PlusFour));
-        v.push(Card(None, Face::ChangeColor));
+    #[inline]
+    pub fn uncolored(face: UncoloredFace) -> Self {
+        Self::Uncolored(UncoloredCard(face))
     }
 
-    d
+    #[inline]
+    pub fn colored(face: Face, color: Color) -> Self {
+        Self::Colored(ColoredCard(face, color))
+    }
 }
 
 impl std::fmt::Display for Card {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let face = match self.1 {
-            Face::Zero => "0",
-            Face::One => "1",
-            Face::Two => "2",
-            Face::Three => "3",
-            Face::Four => "4",
-            Face::Five => "5",
-            Face::Six => "6",
-            Face::Seven => "7",
-            Face::Eight => "8",
-            Face::Nine => "9",
-            Face::Skip => "SKP",
-            Face::FlipDirection => "FLP",
-            Face::PlusTwo => "+2",
-            Face::PlusFour => "+4",
-            Face::ChangeColor => "CHC"
-        };
-        let color_start = match self.0 {
-            None => "\x1b[30;47m",
-            Some(Color::Red) => "\x1b[37;41m",
-            Some(Color::Yellow) => "\x1b[30;43m",
-            Some(Color::Green) => "\x1b[37;42m",
-            Some(Color::Blue) => "\x1b[37;44m",
+        let (face, color_ansi) = match self {
+            Card::Uncolored(UncoloredCard(face)) => (face.to_string(), Color::blank()),
+            Card::Colored(ColoredCard(face, color)) => (face.to_string(), color.as_ansi_code())
         };
 
-        write!(f, "{}{:^3}{}", color_start, face, "\x1b[0m")
+        write!(f, "{}{}{}", color_ansi, face, Color::ansi_reset_code())
     }
 }
