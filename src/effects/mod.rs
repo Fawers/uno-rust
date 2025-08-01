@@ -1,13 +1,9 @@
 pub mod apply;
 
 #[derive(Debug, PartialEq)]
-pub enum PlayerEffect {
+pub enum CardEffect {
     Draw2,
-    Draw4
-}
-
-#[derive(Debug, PartialEq)]
-pub enum SessionEffect {
+    Draw4,
     SkipPlayer,
     FlipDirection
 }

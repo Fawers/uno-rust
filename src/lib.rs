@@ -4,3 +4,4 @@ pub mod players;
 pub mod rules;
 pub mod sessions;
 pub mod utils;
+pub mod events;

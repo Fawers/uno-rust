@@ -2,24 +2,20 @@ pub trait Logger {
     fn log(&mut self, message: String);
 }
 
+pub struct FnLogger<F>(F);
+
+impl <F> Logger for FnLogger<F>
+where F: FnMut(String)
+{
+    fn log(&mut self, message: String) {
+        (self.0)(message);
+    }
+}
+
 pub fn noop_logger() -> impl Logger {
-    NoopLogger
+    FnLogger(|_| {})
 }
 
 pub fn stdout_logger() -> impl Logger {
-    StdoutLogger
-}
-
-struct NoopLogger;
-
-impl Logger for NoopLogger {
-    fn log(&mut self, _: String) {}
-}
-
-struct StdoutLogger;
-
-impl Logger for StdoutLogger {
-    fn log(&mut self, message: String) {
-        println!("{message}");
-    }
+    FnLogger(|message| println!("{message}"))
 }
